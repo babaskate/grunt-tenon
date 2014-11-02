@@ -1,9 +1,6 @@
 /*
  * tenon
- * http://tenon.io
  *
- * Copyright (c) 2014 Asa Baylus
- * Licensed under the RESTRICTED license.
  */
 
 'use strict';
