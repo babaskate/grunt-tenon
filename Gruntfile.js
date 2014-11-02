@@ -53,7 +53,7 @@ module.exports = function(grunt) {
             }
         },
         options: {
-            apiKey: "3f2ee7f935c01731b7e5bc78f408cd85",
+            apiKey: "5478f49618ac809e9801c66279e3e52a",
             timeout: 20000,
             urlService: "content/te-dev/usa/en/admin/testaccessibilty.json.html"
         }

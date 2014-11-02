@@ -182,11 +182,11 @@ module.exports = function(grunt) {
         // Process each filepath in-order.
         async.eachSeries(urls, function(url, next) {
 
-            grunt.verbose.subhead(' Testing:  ' + url.cyan + ' ').or.write(' Testing:  ' + url.cyan + ' ');
+            grunt.verbose.subhead('Testing:  ' + url.cyan + ' ').or.write('Testing:  ' + url.cyan + ' ');
 
             //Hit the tenon API
             curl(
-                'http://www..tenon.io/api/',
+                'http://www.tenon.io/api/',
                 {
                     POSTFIELDS: 'url=' + url +
                     '&key=' + apiKey +
@@ -197,71 +197,85 @@ module.exports = function(grunt) {
                 },
                 function (err) {
 
-                    var results = JSON.parse(this.body),
-                        issues,
-                        errors,
-                        warnings,
-                        duration = 0;
-
-                    if (results.status !== 200) {
-                        status.failed ++;
-                        grunt.log.writeln();
-                        grunt.log.error(results.message);
-                    }
-
                     if (err) {
-                        grunt.log.writeln(err);
-                    }
 
-                    if(errors >= 1) {
-                        status.failed ++;
+                        grunt.log.writeln("\nCurl Error: " + err);
+
+//                        done();
+
                     } else {
-                        status.passed ++;
-                    }
 
-                    status.total ++;
+                        var results = JSON.parse(this.body),
+                            issues,
+                            errors,
+                            warnings,
+                            duration = 0;
 
-                    if (results.status === 200) {
+                        if (results.status !== 200) {
 
-                        issues = results.resultSummary.issues.totalIssues;
-                        errors = results.resultSummary.issues.totalErrors;
-                        warnings = results.resultSummary.issues.totalWarnings;
-                        duration = parseFloat(results.responseExecTime);
+                            status.failed ++;
+                            grunt.log.writeln();
+                            grunt.log.error(results.message + "- " + results.code);
+                            grunt.log.writeln();
 
-                        grunt.log.writeln();
-                        grunt.log.writeln('warnings: ', warnings);
-                        grunt.log.writeln('  errors: ', errors);
-                        grunt.log.writeln('duration: ', duration);
+                            console.log(results);
 
-                        reporter(results.resultSet);
+                        } else {
 
-                        var failed = status.failed,
-                            total = status.total;
+                            if(errors >= 1) {
 
-                        // Print assertion errors here, if verbose mode is disabled.
-                        if (!grunt.option('verbose')) {
-                            if (failed > 0) {
-                                grunt.log.writeln();
-                                logFailedAssertions();
-                            } else if (total === 0) {
-                                warnUnlessForced('0/0 pages tested (' + duration.toFixed(2) + 'sec)');
+                                status.failed ++;
+
                             } else {
-                                grunt.log.ok();
+
+                                status.passed ++;
+
                             }
+
+                            status.total ++;
+
+                            if (results.status === 200) {
+
+                                issues = results.resultSummary.issues.totalIssues;
+                                errors = results.resultSummary.issues.totalErrors;
+                                warnings = results.resultSummary.issues.totalWarnings;
+                                duration = parseFloat(results.responseExecTime);
+
+                                grunt.log.writeln();
+                                grunt.log.writeln('warnings: ', warnings);
+                                grunt.log.writeln('  errors: ', errors);
+                                grunt.log.writeln('duration: ', duration);
+
+                                reporter(results.resultSet);
+
+                                var failed = status.failed,
+                                    total = status.total;
+
+                                // Print assertion errors here, if verbose mode is disabled.
+                                if (!grunt.option('verbose')) {
+                                    if (failed > 0) {
+                                        grunt.log.writeln();
+                                        logFailedAssertions();
+                                    } else if (total === 0) {
+                                        warnUnlessForced('0/0 pages tested (' + duration.toFixed(2) + 'sec)');
+                                    } else {
+                                        grunt.log.ok();
+                                    }
+                                }
+
+                            }
+
+                            status.duration = duration + status.duration;
+
                         }
 
                     }
 
-//                    if (err) {
-//                        // If there was an error, abort the series.
-//                       done();
-//                    }
-
-                    status.duration = duration + status.duration;
-
                     next();
+                }
+            );
 
-                });
+
         },
         // All tests have been run.
         function() {
@@ -343,7 +357,6 @@ module.exports = function(grunt) {
             });
 
         } else {
-
             //test each url against tennon
             testUrls(urls, options.apiKey, done, options.timeout);
 
