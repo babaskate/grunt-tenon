@@ -218,7 +218,7 @@ module.exports = function(grunt) {
                             grunt.log.error(results.message + "- " + results.code);
                             grunt.log.writeln();
 
-                            console.log(results);
+//                            console.log(results);
 
                         } else {
 
