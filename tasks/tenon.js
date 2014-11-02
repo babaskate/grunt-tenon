@@ -1,11 +1,8 @@
 /*
  * grunt-tenon
- * http://tenon.io
  *
- * Copyright (c) 2014 Asa Baylus
- * Licensed under the LIMITED license.
+ * NEED LICENSE INFO?
  */
-
 
 'use strict';
 
@@ -18,9 +15,6 @@ module.exports = function(grunt) {
     //var _ = require('lodash');
     var curl = require('node-curl');
     var async = require('async');
-
-    // Tenon-API
-    //var tenon = require('tenon');
 
     // Nodejs libs.
     //var path = require('path');
@@ -192,7 +186,7 @@ module.exports = function(grunt) {
 
             //Hit the tenon API
             curl(
-                'http://beta.tenon.io/api/',
+                'http://www..tenon.io/api/',
                 {
                     POSTFIELDS: 'url=' + url +
                     '&key=' + apiKey +
