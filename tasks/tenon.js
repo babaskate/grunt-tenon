@@ -172,7 +172,7 @@ module.exports = function(grunt) {
     function testUrls(urls, apiKey, done, timeout) {
 
         // Reset status.
-        var status = {
+        var responseStatus = {
             failed: 0,
             passed: 0,
             total: 0,
@@ -182,7 +182,7 @@ module.exports = function(grunt) {
         // Process each filepath in-order.
         async.eachSeries(urls, function(url, next) {
 
-            grunt.verbose.subhead('Testing:  ' + url.cyan + ' ').or.write('Testing:  ' + url.cyan + ' ');
+            grunt.verbose.subhead('Testing:  ' + url.cyan + '\n').or.write('Testing:  ' + url.cyan + '\n');
 
             //Hit the tenon API
             curl(
@@ -197,13 +197,7 @@ module.exports = function(grunt) {
                 },
                 function (err) {
 
-                    if (err) {
-
-                        grunt.log.writeln("\nCurl Error: " + err);
-
-//                        done();
-
-                    } else {
+                    if (this.status === 200 && !err) {
 
                         var results = JSON.parse(this.body),
                             issues,
@@ -213,65 +207,70 @@ module.exports = function(grunt) {
 
                         if (results.status !== 200) {
 
-                            status.failed ++;
-                            grunt.log.writeln();
                             grunt.log.error(results.message + "- " + results.code);
-                            grunt.log.writeln();
-
-//                            console.log(results);
+                            grunt.log.verbose.writeflags(results, "tenon error: ");
 
                         } else {
 
-                            if(errors >= 1) {
+                            issues = results.resultSummary.issues.totalIssues;
+                            errors = results.resultSummary.issues.totalErrors;
+                            warnings = results.resultSummary.issues.totalWarnings;
+                            duration = parseFloat(results.responseExecTime);
 
-                                status.failed ++;
+                            grunt.log.writeln();
+                            grunt.log.writeln('warnings: ', warnings);
+                            grunt.log.writeln('  errors: ', errors);
+                            grunt.log.writeln('duration: ', duration);
 
+                            reporter(results.resultSet);
+
+                            if (errors >= 1) {
+                                responseStatus.failed ++;
                             } else {
-
-                                status.passed ++;
-
+                                responseStatus.passed ++;
                             }
 
-                            status.total ++;
+                            responseStatus.total ++;
 
-                            if (results.status === 200) {
+                            responseStatus.duration = duration + responseStatus.duration;
 
-                                issues = results.resultSummary.issues.totalIssues;
-                                errors = results.resultSummary.issues.totalErrors;
-                                warnings = results.resultSummary.issues.totalWarnings;
-                                duration = parseFloat(results.responseExecTime);
+                            var failed = responseStatus.failed,
+                                total = responseStatus.total;
 
-                                grunt.log.writeln();
-                                grunt.log.writeln('warnings: ', warnings);
-                                grunt.log.writeln('  errors: ', errors);
-                                grunt.log.writeln('duration: ', duration);
-
-                                reporter(results.resultSet);
-
-                                var failed = status.failed,
-                                    total = status.total;
-
-                                // Print assertion errors here, if verbose mode is disabled.
-                                if (!grunt.option('verbose')) {
-                                    if (failed > 0) {
-                                        grunt.log.writeln();
-                                        logFailedAssertions();
-                                    } else if (total === 0) {
-                                        warnUnlessForced('0/0 pages tested (' + duration.toFixed(2) + 'sec)');
-                                    } else {
-                                        grunt.log.ok();
-                                    }
+                            // Print assertion errors here, if verbose mode is disabled.
+                            if (!grunt.option('verbose')) {
+                                if (failed > 0) {
+                                    grunt.log.writeln();
+                                    logFailedAssertions();
+                                } else if (total === 0) {
+                                    warnUnlessForced('0/0 pages tested (' + duration.toFixed(2) + 'sec)');
+                                } else {
+                                    grunt.log.ok();
                                 }
-
                             }
-
-                            status.duration = duration + status.duration;
 
                         }
 
+                        next();
+
+                    } else {
+
+                        var errPrefix = "curl error";
+
+                        if (err) {
+                            grunt.log.error(errPrefix + ": " + err);
+                        } else {
+                            grunt.log.error(errPrefix + ": " + this.status);
+                            var response = {
+                                code: this.code,
+                                status: this.status,
+                                body: this.body
+                            };
+                            grunt.verbose.writeflags(response, errPrefix);
+                        }
+//                        done();
                     }
 
-                    next();
                 }
             );
 
@@ -281,14 +280,14 @@ module.exports = function(grunt) {
         function() {
 
             // Log results.
-            if (status.failed > 0) {
-                warnUnlessForced(status.failed + '/' + status.total +
-                        ' pages failed (' + status.duration.toFixed(2) + 'sec)');
-            } else if (status.total === 0) {
-                warnUnlessForced('0/0 pages tested (' + status.duration.toFixed(2) + 'sec)');
+            if (responseStatus.failed > 0) {
+                warnUnlessForced(responseStatus.failed + '/' + responseStatus.total +
+                        ' pages failed (' + responseStatus.duration.toFixed(2) + 'sec)');
+            } else if (responseStatus.total === 0) {
+                warnUnlessForced('0/0 pages tested (' + responseStatus.duration.toFixed(2) + 'sec)');
             } else {
-                grunt.verbose.writeln();
-                grunt.log.ok(status.total + ' pages passed (' + status.duration.toFixed(2) + 'sec)');
+                grunt.verbose.writeln("--");
+                grunt.log.ok(responseStatus.total + ' pages passed (' + responseStatus.duration.toFixed(2) + 'sec)');
             }
 
             // All done!
@@ -340,7 +339,12 @@ module.exports = function(grunt) {
         //If the site has a service that returns URLs to pages, hit the service to fetch the urls and pass to tenon
         if (options.urlService) {
 
-            var service = options.httpBase + '/' + options.urlService;
+            var slash = "";
+            if (options.urlService.indexOf("/") === 0) {
+                slash = "/";
+            }
+
+            var service = options.httpBase + slash + options.urlService;
 
             fetchUrls(service, function(extraUrls) {
 
