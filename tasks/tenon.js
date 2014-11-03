@@ -1,7 +1,7 @@
 /*
  * grunt-tenon
- *
- * NEED LICENSE INFO?
+ * https://github.com/babaskate/grunt-tenon
+ * Copyright (c) 2014 Andrew Babaian
  */
 
 'use strict';
