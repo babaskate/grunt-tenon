@@ -3,7 +3,6 @@
   "version": "0.0.1",
   "description": "grunt tenon accesibility test plugin",
   "main": "Gruntfile.js",
-  "private": "false",
   "directories": {
     "test": "test"
   },
