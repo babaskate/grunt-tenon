@@ -155,5 +155,8 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 
 ## Release History
 v0.0.1
+
 v0.0.2 - updated Gruntfile.js
+
 v0.0.3 - updated README.md
+
