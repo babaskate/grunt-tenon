@@ -162,3 +162,5 @@ v0.0.2 - updated Gruntfile.js
 
 v0.0.3 - updated README.md
 
+v0.0.4 - Updated for NPM
+
