@@ -39,43 +39,50 @@ grunt.initConfig({
 
 #### options.apiKey
 Type: `String`
-Default: ``
+
+Default: `''`
 
 Registered tenon API key.
 
 #### options.contentPaths
 Type: `Array`
+
 Default: `[]`
 
 A list of explicit content paths that are concatenated with the `httpBase` to form a publicly accessible URL for the tenon API to crawl.
 
 #### options.force
 Type: `Boolean`
+
 Default: `false`
 
 Set `force` to `true` to report JSHint errors but not fail the task.
 
 #### options.httpBase
 Type: `String`
-Default: ``
+
+Default: `''`
 
 Base host for an internal list of URLs to crawl.
 
 #### options.timeout
 Type: `Number`
+
 Default value: `3000`
 
 The number in miliseconds of the request timeout to the tenon API.
 
 #### options.urls
 Type: `Array`
+
 Default value: `[]`
 
 A list of publicly accessible URLs that can be fetched via the tenon API.
 
 #### options.urlService
 Type: `String`
-Default value: ``
+
+Default value: `''`
 
 A list of publicly accessible URLs that can be fetched via the tenon API.
 
