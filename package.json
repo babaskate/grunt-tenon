@@ -1,6 +1,6 @@
 {
   "name": "grunt-tenon",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "description": "grunt tenon accesibility test plugin",
   "main": "Gruntfile.js",
   "directories": {
