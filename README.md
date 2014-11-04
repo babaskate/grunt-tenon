@@ -1,4 +1,4 @@
-# tenon
+# grunt-tenon
 
 > Accessibility testing tool
 
@@ -37,48 +37,109 @@ grunt.initConfig({
 
 ### Options
 
-#### options.separator
+#### options.apiKey
 Type: `String`
-Default value: `',  '`
+Default: ``
 
-A string value that is used to do something with whatever.
+Registered tenon API key.
 
-#### options.punctuation
+#### options.contentPaths
+Type: `Array`
+Default: `[]`
+
+A list of explicit content paths that are concatenated with the `httpBase` to form a publicly accessible URL for the tenon API to crawl.
+
+#### options.force
+Type: `Boolean`
+Default: `false`
+
+Set `force` to `true` to report JSHint errors but not fail the task.
+
+#### options.httpBase
 Type: `String`
-Default value: `'.'`
+Default: ``
 
-A string value that is used to do something else with whatever else.
+Base host for an internal list of URLs to crawl.
+
+#### options.timeout
+Type: `Number`
+Default value: `3000`
+
+The number in miliseconds of the request timeout to the tenon API.
+
+#### options.urls
+Type: `Array`
+Default value: `[]`
+
+A list of publicly accessible URLs that can be fetched via the tenon API.
+
+#### options.urlService
+Type: `String`
+Default value: ``
+
+A list of publicly accessible URLs that can be fetched via the tenon API.
+
+```json
+{
+    urls: [
+        {
+            path: "/content/te-dev/usa/en/sprint-7/video-details"
+        },
+        {
+            path: "/content/te-dev/usa/en/sprint-4/pnp/demo-browse"
+        },
+        {
+            path: "/content/te-dev/usa/en/sprint-6/pgp/demo-pgp"
+        }
+    ]
+}
+```
 
 ### Usage Examples
 
 #### Default Options
-In this example, the default options are used to do something with whatever. So if the `testing` file has the content `Testing` and the `123` file had the content `1 2 3`, the generated result would be `Testing, 1 2 3.`
+In this example, the default options are used to set the tenon API key and public URL is crawled by the service.
 
 ```js
 grunt.initConfig({
-  tenon: {
-    options: {},
-    files: {
-      'dest/default_options': ['src/testing', 'src/123'],
-    },
-  },
+    tenon: {
+        options: {
+            apiKey: "z3x55cx71z6045466X28cdacc87x544z"
+        },
+        local: {
+            urls: [
+                'http://www.myawesomewebsite.com'
+            ]
+        }
+    }
 });
 ```
 
 #### Custom Options
-In this example, custom options are used to do something else with whatever else. So if the `testing` file has the content `Testing` and the `123` file had the content `1 2 3`, the generated result in this case would be `Testing: 1 2 3 !!!`
+In this example, custom options are used to overwrite the default options.
 
 ```js
 grunt.initConfig({
-  tenon: {
-    options: {
-      separator: ': ',
-      punctuation: ' !!!',
-    },
-    files: {
-      'dest/default_options': ['src/testing', 'src/123'],
-    },
-  },
+    tenon: {
+        options: {
+            apiKey: "z3x55cx71z6045466X28cdacc87x544z"
+        },
+        local: {
+            urls: [
+                'http://www.myawesomewebsite.com'
+            ]
+        },
+        prod: {
+            options: {
+                timeout: 240000,
+                urlService: "/content/te-dev/usa/en/admin/testaccessibility.json.html"
+                httpBase: "http://publish.ngrok.com",
+                contentPaths: [
+                    '/content/te-dev/usa/en/index.html'
+                ]
+            }
+        }
+    }
 });
 ```
 
@@ -87,3 +148,5 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 
 ## Release History
 v0.0.1
+v0.0.2 - updated Gruntfile.js
+v0.0.3 - updated README.md
