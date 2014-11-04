@@ -2,6 +2,8 @@
 
 > Accessibility testing tool
 
+This plugin is currently in beta. Please file an issues as you come accross. Contributors welcome.
+
 ## Getting Started
 This plugin requires Grunt `~0.4.4`
 
