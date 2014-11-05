@@ -2,7 +2,9 @@
 
 > Accessibility testing tool
 
-This plugin is currently in beta. Please file an issues as you come accross. Contributors welcome.
+Grunt task interface to the [Tenon.io](http://tenon.io) automated accessibility testing service; [learn more about Tenon.io here](http://tenon.io/documentation/).
+
+This plugin is currently in beta. Please file an issues as you come across. Contributors welcome.
 
 ## Getting Started
 This plugin requires Grunt `~0.4.4`
@@ -163,4 +165,3 @@ v0.0.2 - updated Gruntfile.js
 v0.0.3 - updated README.md
 
 v0.0.4 - Updated for NPM
-
