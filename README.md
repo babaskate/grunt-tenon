@@ -143,7 +143,7 @@ grunt.initConfig({
         prod: {
             options: {
                 timeout: 240000,
-                urlService: "/content/te-dev/usa/en/admin/testaccessibility.json.html"
+                urlService: "/content/te-dev/usa/en/admin/testaccessibility.json.html",
                 httpBase: "http://publish.ngrok.com",
                 contentPaths: [
                     '/content/te-dev/usa/en/index.html'
