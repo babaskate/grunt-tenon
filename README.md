@@ -39,6 +39,15 @@ grunt.initConfig({
 });
 ```
 
+### Properties
+
+#### urls
+Type: `Array`
+
+Default value: `[]`
+
+A list of publicly accessible URLs that can be fetched via the tenon API.
+
 ### Options
 
 #### options.apiKey
@@ -76,19 +85,12 @@ Default value: `3000`
 
 The number in miliseconds of the request timeout to the tenon API.
 
-#### options.urls
-Type: `Array`
-
-Default value: `[]`
-
-A list of publicly accessible URLs that can be fetched via the tenon API.
-
 #### options.urlService
 Type: `String`
 
 Default value: `''`
 
-A list of publicly accessible URLs that can be fetched via the tenon API.
+A custom service endpoint that must return JSON and has a `urls` property. This property is an `array` of object literals. An individual object literal has a property called, `path`, which is the path tto a page. The path can be fully qualified or relative to the `httpBase`.
 
 ```json
 {
@@ -119,7 +121,7 @@ grunt.initConfig({
         },
         local: {
             urls: [
-                'http://www.myawesomewebsite.com'
+                "http://www.myawesomewebsite.com"
             ]
         }
     }
@@ -133,20 +135,27 @@ In this example, custom options are used to overwrite the default options.
 grunt.initConfig({
     tenon: {
         options: {
-            apiKey: "z3x55cx71z6045466X28cdacc87x544z"
+            httpBase: "http://www2-qa.foo.com",
+            apiKey: "z3x55cx71z6045466X28cdacc87x544z",
+            timeout: 240000,
+            urlService: "/content/te-dev/usa/en/admin/testaccessibility.json.html",
+            apiOptions: {
+                certainty: 80,
+                level: "A",
+                priority: 40
+            },
+            force: true
         },
         local: {
             urls: [
-                'http://www.myawesomewebsite.com'
+                "http://www.myawesomewebsite.com"
             ]
         },
         prod: {
             options: {
-                timeout: 240000,
-                urlService: "/content/te-dev/usa/en/admin/testaccessibility.json.html",
-                httpBase: "http://publish.ngrok.com",
+                urlService: "http://www2.foo.com/content/te-dev/usa/en/admin/testaccessibility.json.html",
                 contentPaths: [
-                    '/content/te-dev/usa/en/index.html'
+                    "/content/te-dev/usa/en/index.html"
                 ]
             }
         }
@@ -160,8 +169,18 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 ## Release History
 v0.0.1
 
-v0.0.2 - updated Gruntfile.js
+v0.0.2
+* Updated Gruntfile.js
 
-v0.0.3 - updated README.md
+v0.0.3
+* Updated README.md
 
-v0.0.4 - Updated for NPM
+v0.0.4
+* Updated for NPM
+
+v.0.0.5
+* Refactored node modules.
+* Added tenon api options as task options
+* Moved `urls` from options to dedicated property and made reverse compatible as options. This matches the usage examples now.
+* Edited custom service description.
+* Updated README.md
