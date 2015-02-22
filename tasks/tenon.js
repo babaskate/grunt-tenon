@@ -35,7 +35,8 @@ module.exports = function (grunt) {
             //url service
             urlService: false,
             //tenon options
-            apiOptions: {}
+            apiOptions: {},
+            aemPathFix: ""
         }),
         urls = [],
         done = this.async(); // This task is asynchronous.
@@ -70,7 +71,7 @@ module.exports = function (grunt) {
                     //push the extra urls passed back from the service on the urls array
                     if (extraUrls) {
                         extraUrls.urls.forEach(function(url) {
-                            urls.push(url.path + '.html');
+                            urls.push(utils.formatUrl(url.path + options.aemPathFix, options.httpBase));
                         });
                     }
 
