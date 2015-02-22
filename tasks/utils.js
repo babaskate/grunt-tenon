@@ -19,19 +19,13 @@
                     u = u.substring(1, u.length);
                 }
 
-//                console.log("url = " + u);
-
                 if (hb.slice(-1) === "/") {
                     hb = hb.substring(0,hb.length - 1);
                 }
 
-//                console.log("httpBase = " + hb);
-
                 url = hb + slash + u;
 
             }
-
-//            console.log(url);
 
             return url;
         },
@@ -44,12 +38,18 @@
                 fixedUrls = [];
 
             for (; i < len; i++) {
-                if (this.formatUrl(urls[i], httpBase)) {
-                    fixedUrls.push(this.formatUrl(urls[i], httpBase));
+
+                if (typeof urls[i] === "string") {
+                    if (this.formatUrl(urls[i], httpBase)) {
+                        fixedUrls.push(this.formatUrl(urls[i], httpBase));
+                    }
+                } else {
+                    if (this.formatUrl(urls[i].url, httpBase)) {
+                        urls[i].url = this.formatUrl(urls[i].url, httpBase);
+                        fixedUrls.push(urls[i]);
+                    }
                 }
             }
-
-//            console.dir(fixedUrls);
 
             return fixedUrls;
         }
