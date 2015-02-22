@@ -191,3 +191,6 @@ v.0.0.5
 * Moved `urls` from options to dedicated property and made reverse compatible as options. This matches the usage examples now.
 * Edited custom service description.
 * Updated README.md
+
+v.0.0.6
+* Updated README.md
