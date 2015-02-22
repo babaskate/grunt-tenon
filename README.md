@@ -57,6 +57,13 @@ Default: `''`
 
 Registered tenon API key.
 
+#### options.apiOptions
+Type: `Object`
+
+Default: `{}`
+
+An object literal of tenon api parameters.
+
 #### options.contentPaths
 Type: `Array`
 
