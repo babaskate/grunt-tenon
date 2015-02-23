@@ -2,13 +2,14 @@
 
     'use strict';
 
-    var service = module.exports = {},
+    var api = module.exports = {},
         curl = require('node-curl'),
         async = require('async'),
+        extend = require('extend'),
         reporter = require('./reporter'),
         grunt;
 
-    service.init = function (parentGrunt) {
+    api.init = function (parentGrunt) {
         grunt = parentGrunt;
         reporter.init(grunt);
     };
@@ -47,7 +48,7 @@
         }
     };
 
-    service.fetchUrls = function (service, callback) {
+    api.fetchUrls = function (service, callback) {
 
         curl(service, function (err) {
 
@@ -70,7 +71,46 @@
 
     };
 
-    service.testUrls = function (urls, apiKey, done, timeout, force, tenonOpts) {
+    function writeOptParams(obj) {
+
+        var str = "";
+
+        str += obj.certainty ? '&certainty=' + obj.certainty : '';
+        str += obj.fragment ? '&fragment=' + obj.fragment : '';
+        str += obj.importance ? '&importance=' + obj.importance : '';
+        str += obj.level ? '&level=' + obj.level : '';
+        str += obj.priority ? '&priority=' + obj.priority : '';
+        str += obj.ref ? '&ref=' + obj.ref : '';
+        str += obj.store ? '&store=' + obj.store : '';
+        str += obj.systemID ? '&systemID=' + obj.systemID : '';
+        str += obj.projectID ? '&projectID=' + obj.projectID : '';
+        str += obj.uaString ? '&uaString=' + obj.uaString : '';
+        str += obj.viewPortHeight ? '&viewPortHeight=' + obj.viewPortHeight : '';
+        str += obj.viewPortWidth ? '&viewPortWidth=' + obj.viewPortWidth : '';
+
+        return str;
+    }
+
+    function getTenonResults(url, apiKey, timeout, tenonOpts, callback) {
+
+        curl(
+            'http://www.tenon.io/api/',
+            {
+                POSTFIELDS: 'url=' + url + '&key=' + apiKey + writeOptParams(tenonOpts),
+                TIMEOUT_MS: timeout || 3000
+            },
+            function (err) {
+                callback(this, err);
+            }
+        );
+
+    }
+
+    //TODO: pass individual opts per URL
+    //report added params passed as options
+    //Add ability to filter specific tests?
+
+    api.testUrls = function (urls, apiKey, done, timeout, force, tenonOpts) {
 
         // Reset status.
         var responseStatus = {
@@ -81,26 +121,29 @@
         };
 
         // Process each filepath in-order.
-        async.eachSeries(urls, function(url, next) {
+        async.eachSeries(urls, function(urlArg, next) {
+
+            var url = urlArg,
+                options = tenonOpts;
+
+            if (typeof url === "object") {
+                url = urlArg.url;
+                options = extend(tenonOpts, urlArg.apiOptions);
+            }
 
             grunt.verbose.subhead('Testing:  ' + url.cyan + '\n').or.write('Testing:  ' + url.cyan + '\n');
 
             //Hit the tenon API
-            curl(
-                'http://www.tenon.io/api/',
-                {
-                    POSTFIELDS: 'url=' + url +
-                    '&key=' + apiKey +
-                    '&certainty=' + (tenonOpts.certainty || 80) +
-                    '&level=' + (tenonOpts.level || 'A') +
-                    '&priority=' + (tenonOpts.priority || 40),
-                    TIMEOUT_MS: timeout || 3000
-                },
-                function (err) {
+            getTenonResults(
+                url,
+                apiKey,
+                timeout,
+                options,
+                function (obj, err) {
 
-                    if (this.status === 200 && !err) {
+                    if (obj.status === 200 && !err) {
 
-                        var results = JSON.parse(this.body),
+                        var results = JSON.parse(obj.body),
                             issues,
                             errors,
                             warnings,
@@ -113,17 +156,10 @@
 
                         } else {
 
-                            issues = results.resultSummary.issues.totalIssues;
                             errors = results.resultSummary.issues.totalErrors;
-                            warnings = results.resultSummary.issues.totalWarnings;
                             duration = parseFloat(results.responseExecTime);
 
-                            grunt.log.writeln();
-                            grunt.log.writeln('warnings: ', warnings);
-                            grunt.log.writeln('  errors: ', errors);
-                            grunt.log.writeln('duration: ', duration);
-
-                            reporter.logger(results.resultSet);
+                            reporter.logger(results, errors, duration);
 
                             if (errors >= 1) {
                                 responseStatus.failed ++;
@@ -161,11 +197,11 @@
                         if (err) {
                             grunt.log.error(errPrefix + ": " + err);
                         } else {
-                            grunt.log.error(errPrefix + ": " + this.status);
+                            grunt.log.error(errPrefix + ": " + obj.status);
                             var response = {
-                                code: this.code,
-                                status: this.status,
-                                body: this.body
+                                code: obj.code,
+                                status: obj.status,
+                                body: obj.body
                             };
                             grunt.verbose.writeflags(response, errPrefix);
                         }
@@ -174,7 +210,6 @@
 
                 }
             );
-
 
         },
         // All tests have been run.

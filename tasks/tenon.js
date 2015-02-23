@@ -14,10 +14,10 @@ module.exports = function (grunt) {
     // A special thanks to "Cowboy" Ben Alman without who's code this would not be possible
     // https://github.com/gruntjs/grunt-contrib-qunit/blob/master/tasks/qunit.js
 
-    var srvc = require('./service'),
+    var api = require('./api'),
         utils = require('./utils');
 
-    srvc.init(grunt);
+    api.init(grunt);
 
     grunt.registerMultiTask('tenon', 'Accessibility testing tool', function () {
 
@@ -45,9 +45,13 @@ module.exports = function (grunt) {
             urls = urls.concat(this.data.urls);
         }
 
-        if (this.data.src) {
-            urls = urls.concat(this.data.src);
-        }
+//        console.dir(this.filesSrc.length);
+//        console.dir(this.files);
+//        console.log(this.data);
+
+//        if (this.data.src) {
+//            urls = urls.concat(this.data.src);
+//        }
 
         if (options.urls) {
             urls = urls.concat(options.urls);
@@ -62,11 +66,9 @@ module.exports = function (grunt) {
 
             var service = utils.formatUrl(options.urlService, options.httpBase);
 
-//            console.log("service = " + service);
-
             if (service) {
 
-                srvc.fetchUrls(service, function(extraUrls) {
+                api.fetchUrls(service, function(extraUrls) {
 
                     //push the extra urls passed back from the service on the urls array
                     if (extraUrls) {
@@ -79,7 +81,7 @@ module.exports = function (grunt) {
 
                     //test each url against tennon
                     if (urls.length > 0) {
-                        srvc.testUrls(urls, options.apiKey, done, options.timeout, options.force, options.apiOptions);
+                        api.testUrls(urls, options.apiKey, done, options.timeout, options.force, options.apiOptions);
                     }
 
                 });
@@ -92,7 +94,7 @@ module.exports = function (grunt) {
             //test each url against tennon
             urls = utils.testUrls(urls, options.httpBase);
             if (urls.length > 0) {
-                srvc.testUrls(urls, options.apiKey, done, options.timeout, options.force, options.apiOptions);
+                api.testUrls(urls, options.apiKey, done, options.timeout, options.force, options.apiOptions);
             }
 
         }

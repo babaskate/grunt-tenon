@@ -43,14 +43,25 @@
     }
 
     // Default Grunt JSHint reporter
-    reporter.logger = function (results) {
+    reporter.logger = function (results, errors, duration) {
+
+        var issues = results.resultSummary.issues.totalIssues,
+            warnings = results.resultSummary.issues.totalWarnings;
+
+        grunt.log.writeln();
+        grunt.log.writeln('projectID: ', results.request.systemID);
+        grunt.log.writeln('issues: ', issues);
+        grunt.log.writeln('warnings: ', warnings);
+        grunt.log.writeln('errors: ', errors);
+        grunt.log.writeln('duration: ', duration);
+
         // Dont report empty data as its an ignored file
-        if (results.length < 1) {
+        if (results.resultSet.length < 1) {
             grunt.log.error('0 issues found.');
             return;
         }
 
-        if (results.length === 0) {
+        if (results.resultSet.length === 0) {
             // Success!
             grunt.verbose.ok();
             return;
@@ -63,7 +74,7 @@
         //var lastfile = null;
 
         // Iterate over all errors.
-        results.forEach(function(result) {
+        results.resultSet.forEach(function(result) {
 
             var e = result;
 
@@ -82,11 +93,11 @@
                 errorSnippet = firstLine(errorSnippet);
                 errorSnippet = htmlDecode(errorSnippet);
                 errorSnippet = wordwrap(errorSnippet, 70, '\n         ');
-                //AB: I don't know enought about the service to figure out why some data comes back without position info. A string is output to prevent it from failing.
+                //AB: I don't know enought about the api to figure out why some data comes back without position info. A string is output to prevent it from failing.
                 grunt.log.writeln((pad(e.position ? e.position.line.toString() : 'no-position',7) + ' |') + errorSnippet.grey);
                 // grunt.log.write(grunt.util.repeat(9,' ') + grunt.util.repeat(e.position.column -1,' ') + '^ ');
                 grunt.log.write(grunt.util.repeat(9,' ') + ' ^ ');
-                grunt.verbose.write('[' + e.signature + '] ');
+                grunt.verbose.write('[' + e.tID + '] ');
                 var resultTitle = wordwrap(e.resultTitle + ' (col:' + e.position.column + ')', 75, '\n         ');
                 grunt.log.writeln(resultTitle);
                 grunt.log.writeln();

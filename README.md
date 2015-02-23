@@ -28,14 +28,14 @@ In your project's Gruntfile, add a section named `tenon` to the data object pass
 
 ```js
 grunt.initConfig({
-  tenon: {
-    options: {
-      // Task-specific options go here.
-    },
-    your_target: {
-      // Target-specific file lists and/or options go here.
-    },
-  },
+    tenon: {
+        options: {
+            // Task-specific options go here.
+        },
+        your_target: {
+            // Target-specific file lists and/or options go here.
+        },
+    }
 });
 ```
 
@@ -46,7 +46,26 @@ Type: `Array`
 
 Default value: `[]`
 
-A list of publicly accessible URLs that can be fetched via the tenon API.
+A list of publicly accessible URLs that can be tested against the tenon API. Items of array, can be `String` or `Object`. If an object, additional tenon params can be added to object literal.
+
+```js
+grunt.initConfig({
+    tenon: {
+        your_target: {
+            urls: [
+                {
+                    url: 'http://www2.foo.com/content/te-com/usa/en/solid-state-connectors/product-1-2106003-1.html',
+                    apiOptions: {
+                        projectID: "MY_SPECIAL_PROJECT_ID",
+                        importance: 3
+                    }
+                },
+                'http://www2.foo.com/content/te-dev/usa/en/index.html'
+            ]
+        }
+    }
+});
+```
 
 ### Options
 
@@ -148,28 +167,35 @@ grunt.initConfig({
             urlService: "/content/te-dev/usa/en/admin/testaccessibility.json.html",
             apiOptions: {
                 certainty: 80,
-                level: "A",
-                priority: 40
+                level: 'A',
+                priority: 40,
+                projectID: "MY_PROJECT_ID"
             },
             force: true
         },
-        local: {
-            urls: [
-                "http://www.myawesomewebsite.com"
-            ]
-        },
-        prod: {
+        teLocal: {
             options: {
-                urlService: "http://www2.foo.com/content/te-dev/usa/en/admin/testaccessibility.json.html",
                 contentPaths: [
-                    "/content/te-dev/usa/en/index.html"
+                    '/content/te-dev/usa/en/index.html'
                 ]
             }
+        },
+        teProd: {
+            options: {
+                urlService: "http://www2.foo.com/content/te-dev/usa/en/admin/testaccessibility.json.html"
+            },
+            urls: [
+                {
+                    url: 'http://www2.foo.com/content/te-com/usa/en/solid-state-connectors/product-1-2106003-1.html',
+                    apiOptions: {
+                        projectID: "MY_SPECIAL_PROJECT_ID"
+                    }
+                }
+            ]
         }
     }
 });
 ```
-
 ## Contributing
 In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [Grunt](http://gruntjs.com/).
 
@@ -196,3 +222,7 @@ v.0.0.6
 * Updated README.md
 
 v.0.0.7
+* Added all tenon options to default (bulk) url requests.
+* Added ability to pass all tenon request options to each test URL to override default options, while still retaining ability to pass individual url strings.
+* Temporaily deprecated the src param, URL testing available in future version
+* Updated README.md
