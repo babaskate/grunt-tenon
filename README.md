@@ -224,5 +224,5 @@ v.0.0.6
 v.0.0.7
 * Added all tenon options to default (bulk) url requests.
 * Added ability to pass all tenon request options to each test URL to override default options, while still retaining ability to pass individual url strings.
-* Temporaily deprecated the src param, URL testing available in future version
+* Temporaily deprecated the `src` param, URL testing available in future version
 * Updated README.md
