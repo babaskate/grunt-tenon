@@ -229,3 +229,6 @@ v.0.0.7
 
 v.0.0.8
 * Updated version of node-curl dependency
+
+v.0.0.8
+* Updates to reporter and tenon API endpoint
