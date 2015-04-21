@@ -226,3 +226,6 @@ v.0.0.7
 * Added ability to pass all tenon request options to each test URL to override default options, while still retaining ability to pass individual url strings.
 * Temporaily deprecated the `src` param, URL testing available in future version
 * Updated README.md
+
+v.0.0.8
+* Updated version of node-curl dependency
