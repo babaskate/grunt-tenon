@@ -49,7 +49,7 @@
             warnings = results.resultSummary.issues.totalWarnings;
 
         grunt.log.writeln();
-        grunt.log.writeln('projectID: ', results.request.systemID);
+        grunt.log.writeln('projectID: ', results.request.projectID || 'Not Set');
         grunt.log.writeln('issues: ', issues);
         grunt.log.writeln('warnings: ', warnings);
         grunt.log.writeln('errors: ', errors);

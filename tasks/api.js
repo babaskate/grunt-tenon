@@ -94,7 +94,7 @@
     function getTenonResults(url, apiKey, timeout, tenonOpts, callback) {
 
         curl(
-            'http://www.tenon.io/api/',
+            'http://tenon.io/api/',
             {
                 POSTFIELDS: 'url=' + url + '&key=' + apiKey + writeOptParams(tenonOpts),
                 TIMEOUT_MS: timeout || 3000
