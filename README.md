@@ -7,7 +7,9 @@ Grunt task interface to the [Tenon.io](http://tenon.io) automated accessibility 
 This plugin is currently in beta. Please file an issues as you come across. Contributors welcome.
 
 ## Getting Started
-This plugin requires Grunt `~0.4.4`
+This plugin requires Grunt `~0.4.4` and Node no later than 0.10.0*.
+
+*Users with newer versions are experiencing issues with the node-curl plugin that is required to make request against the Tenon API.
 
 If you haven't used [Grunt](http://gruntjs.com/) before, be sure to check out the [Getting Started](http://gruntjs.com/getting-started) guide, as it explains how to create a [Gruntfile](http://gruntjs.com/sample-gruntfile) as well as install and use Grunt plugins. Once you're familiar with that process, you may install this plugin with this command:
 
@@ -230,5 +232,5 @@ v.0.0.7
 v.0.0.8
 * Updated version of node-curl dependency
 
-v.0.0.8
+v.0.0.9
 * Updates to reporter and tenon API endpoint
