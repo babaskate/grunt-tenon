@@ -7,7 +7,16 @@
         async = require('async'),
         extend = require('extend'),
         reporter = require('./reporter'),
-        grunt;
+        grunt,
+        responseStatus = {
+            failed: 0,
+            passed: 0,
+            total: 0,
+            duration: 0
+        },
+        errPrefix = "curl error";
+
+
 
     api.init = function (parentGrunt) {
         grunt = parentGrunt;
@@ -32,6 +41,7 @@
     // Keep track of failed assertions for pretty-printing.
     var failedAssertions = [];
     var logFailedAssertions = function() {
+
         var assertion;
         // Print each assertion error.
         while (assertion = failedAssertions.shift()) {
@@ -50,13 +60,15 @@
 
     api.fetchUrls = function (service, callback) {
 
-        curl(service, function (err) {
+        curl(service, {}, function (err) {
 
             if (!err && this.status === 200 && callback) {
                 callback(JSON.parse(this.body));
             } else {
 
-                grunt.log.writeln('Problem fetching urls. ' + this.status + ' - ' + this.body);
+//                grunt.log.writeln(this);
+                grunt.log.writeln(service + '\n');
+                grunt.log.error('Problem fetching urls. ' + this.status + ' ' + JSON.parse(this.body));
 
                 if (err) {
                     grunt.log.writeln(err);
@@ -91,19 +103,63 @@
         return str;
     }
 
-    function getTenonResults(url, apiKey, timeout, tenonOpts, callback) {
+    function tenonSuccess(obj, force) {
 
-        curl(
-            'http://tenon.io/api/',
-            {
-                POSTFIELDS: 'url=' + url + '&key=' + apiKey + writeOptParams(tenonOpts),
-                TIMEOUT_MS: timeout || 3000
-            },
-            function (err) {
-                callback(this, err);
+        var results = JSON.parse(obj.body),
+            errors,
+            duration = 0;
+
+        //tenon status
+        if (results.status !== 200) {
+
+            grunt.log.error(results.message + "- " + results.code);
+            grunt.log.verbose.writeflags(results, "tenon error: ");
+
+        } else {
+
+            errors = results.resultSummary.issues.totalErrors;
+            duration = parseFloat(results.responseExecTime);
+
+            reporter.logger(results, errors, duration);
+
+            if (errors >= 1) {
+                responseStatus.failed ++;
+            } else {
+                responseStatus.passed ++;
             }
-        );
 
+            responseStatus.total ++;
+            responseStatus.duration = duration + responseStatus.duration;
+
+            // Print assertion errors here, if verbose mode is disabled.
+            if (!grunt.option('verbose')) {
+                if (responseStatus.failed > 0) {
+                    grunt.log.writeln();
+                    logFailedAssertions();
+                } else if (responseStatus.total === 0) {
+                    warnUnlessForced('0/0 pages tested (' + responseStatus.duration.toFixed(2) + 'sec)', force);
+                } else {
+                    grunt.log.ok();
+                }
+            }
+
+        }
+
+    }
+
+    function tenonError (obj, err) {
+
+        if (err) {
+            grunt.log.error(errPrefix + ": " + err);
+        } else {
+            grunt.log.error(errPrefix + ": " + obj.status);
+            var response = {
+                code: obj.code,
+                status: obj.status,
+                body: obj.body
+            };
+            grunt.verbose.writeflags(response, errPrefix);
+        }
     }
 
     //TODO: pass individual opts per URL
@@ -112,16 +168,8 @@
 
     api.testUrls = function (urls, apiKey, done, timeout, force, tenonOpts) {
 
-        // Reset status.
-        var responseStatus = {
-            failed: 0,
-            passed: 0,
-            total: 0,
-            duration: 0
-        };
-
         // Process each filepath in-order.
-        async.eachSeries(urls, function(urlArg, next) {
+        async.eachSeries(urls, function (urlArg, next) {
 
             var url = urlArg,
                 options = tenonOpts;
@@ -134,86 +182,39 @@
             grunt.verbose.subhead('Testing:  ' + url.cyan + '\n').or.write('Testing:  ' + url.cyan + '\n');
 
             //Hit the tenon API
-            getTenonResults(
-                url,
-                apiKey,
-                timeout,
-                options,
-                function (obj, err) {
+            curl(
+                'http://tenon.io/api/',
+                {
+                    POSTFIELDS: 'url=' + url + '&key=' + apiKey + writeOptParams(options),
+                    TIMEOUT_MS: timeout || 3000
+                },
+                function (err) {
+
+                    var obj = this;
 
                     if (obj.status === 200 && !err) {
 
-                        var results = JSON.parse(obj.body),
-                            issues,
-                            errors,
-                            warnings,
-                            duration = 0;
-
-                        if (results.status !== 200) {
-
-                            grunt.log.error(results.message + "- " + results.code);
-                            grunt.log.verbose.writeflags(results, "tenon error: ");
-
-                        } else {
-
-                            errors = results.resultSummary.issues.totalErrors;
-                            duration = parseFloat(results.responseExecTime);
-
-                            reporter.logger(results, errors, duration);
-
-                            if (errors >= 1) {
-                                responseStatus.failed ++;
-                            } else {
-                                responseStatus.passed ++;
-                            }
-
-                            responseStatus.total ++;
-
-                            responseStatus.duration = duration + responseStatus.duration;
-
-                            var failed = responseStatus.failed,
-                                total = responseStatus.total;
-
-                            // Print assertion errors here, if verbose mode is disabled.
-                            if (!grunt.option('verbose')) {
-                                if (failed > 0) {
-                                    grunt.log.writeln();
-                                    logFailedAssertions();
-                                } else if (total === 0) {
-                                    warnUnlessForced('0/0 pages tested (' + duration.toFixed(2) + 'sec)', force);
-                                } else {
-                                    grunt.log.ok();
-                                }
-                            }
-
-                        }
-
+                        tenonSuccess(obj, force);
                         next();
 
                     } else {
 
-                        var errPrefix = "curl error";
-
-                        if (err) {
-                            grunt.log.error(errPrefix + ": " + err);
-                        } else {
-                            grunt.log.error(errPrefix + ": " + obj.status);
-                            var response = {
-                                code: obj.code,
-                                status: obj.status,
-                                body: obj.body
-                            };
-                            grunt.verbose.writeflags(response, errPrefix);
-                        }
-//                        done();
+                        tenonError(obj, err);
+                        done(false);
+                        next(errPrefix);
                     }
 
                 }
+
             );
 
         },
         // All tests have been run.
-        function() {
+        function (err) {
+
+            if (err) {
+                grunt.log.error("grunt tenon error iterating over URLs: " + err);
+            }
 
             // Log results.
             if (responseStatus.failed > 0) {
@@ -227,7 +228,7 @@
             }
 
             // All done!
-            done();
+//            done();
         });
 
     };
